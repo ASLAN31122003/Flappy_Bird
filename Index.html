@@ -15,20 +15,21 @@ html, body {
 }
 
 #canvas {
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
+	position: fixed !important;
 
-	/* Keep the original 864 x 936 aspect ratio */
-	width: min(100vw, 92.3077vh);
-	height: auto;
+	left: 50% !important;
+	top: 50% !important;
 
-	display: block;
+	transform: translate(-50%, -50%) !important;
+
+	width: min(100vw, 92.3077vh) !important;
+	height: min(100vh, 108.3333vw) !important;
+
+	display: block !important;
 }
 
 #status {
-	position: absolute;
+	position: fixed;
 	left: 0;
 	top: 0;
 	width: 100%;
