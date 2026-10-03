@@ -4,27 +4,41 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
 		<title>Flappy Bird</title>
+
 		<style>
-html, body, #canvas {
+html, body {
 	margin: 0;
 	padding: 0;
 	border: 0;
+	width: 100%;
+	height: 100%;
+	background-color: black;
+	overflow: hidden;
 }
 
 body {
 	color: white;
-	background-color: black;
-	overflow: hidden;
 	touch-action: none;
 }
 
 #canvas {
-	display: block;
+	position: fixed !important;
+	left: 50% !important;
+	top: 50% !important;
+	transform: translate(-50%, -50%) !important;
+
+	/* 864 x 936 aspect ratio */
+	width: min(100vw, 92.3077vh) !important;
+	height: min(100vh, 108.3333vw) !important;
+
+	display: block !important;
 }
 
 #canvas:focus {
 	outline: none;
 }
+
+/* Godot loading screen */
 
 #status, #status-splash, #status-progress {
 	position: absolute;
@@ -90,11 +104,14 @@ body {
 	z-index: 1;
 }
 		</style>
+
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="Index.icon.png" />
-<link rel="apple-touch-icon" href="Index.apple-touch-icon.png"/>
+		<link rel="apple-touch-icon" href="Index.apple-touch-icon.png"/>
 
 	</head>
+
 	<body>
+
 		<canvas id="canvas">
 			Your browser does not support the canvas tag.
 		</canvas>
@@ -110,8 +127,24 @@ body {
 		</div>
 
 		<script src="Index.js"></script>
+
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":1,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"Index","experimentalVK":false,"fileSizes":{"Index.pck":86336,"Index.wasm":37902138},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {
+	"args":[],
+	"canvasResizePolicy":1,
+	"emscriptenPoolSize":8,
+	"ensureCrossOriginIsolationHeaders":true,
+	"executable":"Index",
+	"experimentalVK":false,
+	"fileSizes":{
+		"Index.pck":86304,
+		"Index.wasm":37902138
+	},
+	"focusCanvas":true,
+	"gdextensionLibs":[],
+	"godotPoolSize":4
+};
+
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -127,11 +160,13 @@ const engine = new Engine(GODOT_CONFIG);
 		if (statusMode === mode || !initializing) {
 			return;
 		}
+
 		if (mode === 'hidden') {
 			statusOverlay.remove();
 			initializing = false;
 			return;
 		}
+
 		statusOverlay.style.visibility = 'visible';
 		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
 		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
@@ -142,7 +177,9 @@ const engine = new Engine(GODOT_CONFIG);
 		while (statusNotice.lastChild) {
 			statusNotice.removeChild(statusNotice.lastChild);
 		}
+
 		const lines = text.split('\n');
+
 		lines.forEach((line) => {
 			statusNotice.appendChild(document.createTextNode(line));
 			statusNotice.appendChild(document.createElement('br'));
@@ -151,6 +188,7 @@ const engine = new Engine(GODOT_CONFIG);
 
 	function displayFailureNotice(err) {
 		console.error(err);
+
 		if (err instanceof Error) {
 			setStatusNotice(err.message);
 		} else if (typeof err === 'string') {
@@ -158,6 +196,7 @@ const engine = new Engine(GODOT_CONFIG);
 		} else {
 			setStatusNotice('An unknown error occurred.');
 		}
+
 		setStatusMode('notice');
 		initializing = false;
 	}
@@ -167,54 +206,93 @@ const engine = new Engine(GODOT_CONFIG);
 	});
 
 	if (missing.length !== 0) {
-		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+
+		if (
+			GODOT_CONFIG['serviceWorker'] &&
+			GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] &&
+			'serviceWorker' in navigator
+		) {
+
 			let serviceWorkerRegistrationPromise;
+
 			try {
-				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+				serviceWorkerRegistrationPromise =
+					navigator.serviceWorker.getRegistration();
 			} catch (err) {
-				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+				serviceWorkerRegistrationPromise =
+					Promise.reject(
+						new Error('Service worker registration failed.')
+					);
 			}
-			// There's a chance that installing the service worker would fix the issue
+
 			Promise.race([
-				serviceWorkerRegistrationPromise.then((registration) => {
-					if (registration != null) {
-						return Promise.reject(new Error('Service worker already exists.'));
-					}
-					return registration;
-				}).then(() => engine.installServiceWorker()),
-				// For some reason, `getRegistration()` can stall
+
+				serviceWorkerRegistrationPromise
+					.then((registration) => {
+
+						if (registration != null) {
+							return Promise.reject(
+								new Error('Service worker already exists.')
+							);
+						}
+
+						return registration;
+
+					})
+					.then(() => engine.installServiceWorker()),
+
 				new Promise((resolve) => {
 					setTimeout(() => resolve(), 2000);
 				}),
+
 			]).then(() => {
-				// Reload if there was no error.
+
 				window.location.reload();
+
 			}).catch((err) => {
-				console.error('Error while registering service worker:', err);
+				console.error(
+					'Error while registering service worker:',
+					err
+				);
 			});
+
 		} else {
-			// Display the message as usual
-			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
-			displayFailureNotice(missingMsg + missing.join('\n'));
+
+			const missingMsg =
+				'Error\nThe following features required to run Godot projects on the Web are missing:\n';
+
+			displayFailureNotice(
+				missingMsg + missing.join('\n')
+			);
 		}
+
 	} else {
+
 		setStatusMode('progress');
+
 		engine.startGame({
 			'onProgress': function (current, total) {
+
 				if (current > 0 && total > 0) {
+
 					statusProgress.value = current;
 					statusProgress.max = total;
+
 				} else {
+
 					statusProgress.removeAttribute('value');
 					statusProgress.removeAttribute('max');
 				}
 			},
 		}).then(() => {
+
 			setStatusMode('hidden');
+
 		}, displayFailureNotice);
 	}
+
 }());
 		</script>
+
 	</body>
 </html>
-
